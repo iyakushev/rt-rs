@@ -5,15 +5,14 @@ use std::ops::{
 
 /// A main vector struct that holds 3dimensional information
 pub struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 // create handy type aliases
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;
-
 
 // TODO add later q_rsqrt?
 impl Vec3 {
@@ -41,13 +40,14 @@ impl Vec3 {
     }
 
     /// Multiplies Vec3 components by a `value` inplace
-    pub fn mul_by(&mut self, value: f64) {
+    pub fn mul_by(&mut self, value: f64) -> &mut Self {
         *self *= value;
+        self
     }
 
     /// Multiplies Vec3 components by a `value`
     /// and returns a new vector as a result
-    fn mul_by_new(&self, value: f64) -> Vec3 {
+    pub fn mul_by_new(&self, value: f64) -> Vec3 {
         Vec3 {
             x: self.x * value,
             y: self.y * value,
@@ -75,8 +75,8 @@ impl Vec3 {
 }
 
 impl Add for Vec3 {
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self::Output {
+    type Output = Vec3;
+    fn add(self, rhs: Vec3) -> Self::Output {
         Vec3 {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
@@ -86,8 +86,8 @@ impl Add for Vec3 {
 }
 
 impl Sub for Vec3 {
-    type Output = Self;
-    fn sub(self, rhs: Self) -> Self::Output {
+    type Output = Vec3;
+    fn sub(self, rhs: Vec3) -> Self::Output {
         Vec3 {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
@@ -97,8 +97,8 @@ impl Sub for Vec3 {
 }
 
 impl Mul for Vec3 {
-    type Output = Self;
-    fn mul(self, rhs: Self) -> Self::Output {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Self::Output {
         Vec3 {
             x: self.x * rhs.x,
             y: self.y * rhs.y,
@@ -108,7 +108,48 @@ impl Mul for Vec3 {
 }
 
 impl Div<f64> for Vec3 {
-    type Output = Self;
+    type Output = Vec3;
+    fn div(self, rhs: f64) -> Self::Output {
+        let reverse = 1.0 / rhs;
+        self.mul_by_new(reverse)
+    }
+}
+
+impl<'a, 'b> Add<&'b Vec3> for &'a Vec3 {
+    type Output = Vec3;
+    fn add(self, rhs: &'b Vec3) -> Self::Output {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
+impl<'a, 'b> Sub<&'b Vec3> for &'a Vec3 {
+    type Output = Vec3;
+    fn sub(self, rhs: &'b Vec3) -> Self::Output {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl<'a, 'b> Mul<&'b Vec3> for &'a Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: &'b Vec3) -> Self::Output {
+        Vec3 {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
+    }
+}
+
+impl<'a> Div<f64> for &'a Vec3 {
+    type Output = Vec3;
     fn div(self, rhs: f64) -> Self::Output {
         let reverse = 1.0 / rhs;
         self.mul_by_new(reverse)
@@ -116,8 +157,8 @@ impl Div<f64> for Vec3 {
 }
 
 /// Returns a new Vec3 with each axis sign flipped
-impl Neg for Vec3 {
-    type Output = Self;
+impl<'a> Neg for &'a Vec3 {
+    type Output = Vec3;
 
     fn neg(self) -> Self::Output {
         Vec3 {
