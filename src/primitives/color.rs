@@ -15,13 +15,13 @@ impl Vectored for Color {
     }
 }
 
-impl Add for Color {
+impl<T> Add<T> for Color where T: Vectored {
     type Output = Color;
-    fn add(self, rhs: Self) -> Self::Output {
+    fn add(self, rhs: T) -> Self::Output {
         Color::new(
-            self.r + rhs.r,
-            self.g + rhs.g,
-            self.b + rhs.b
+            self.r + rhs[0],
+            self.g + rhs[1],
+            self.b + rhs[2]
         )
     }
 }

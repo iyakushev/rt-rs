@@ -1,8 +1,9 @@
-use super::traits::Vectored;
+use crate::primitives::traits::Vectored;
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
 };
 
+#[derive(Default)]
 pub struct Point3D {
     pub x: f64,
     pub y: f64,
@@ -101,7 +102,7 @@ impl<'a> Div<f64> for &'a Point3D {
 }
 
 /// Returns a new Point3D with each axis sign flipped
-impl<'a> Neg for &'a Point3D {
+impl Neg for Point3D {
     type Output = Point3D;
 
     fn neg(self) -> Self::Output {

@@ -1,10 +1,10 @@
 mod primitives;
-use primitives::traits::Vectored;
+use primitives::traits::{HitRecord, Solid, Vectored};
 use primitives::objects::Point3D;
 use primitives::ray::Ray;
 use primitives::color::Color;
 
-use crate::primitives::objects::Vector3D;
+use crate::primitives::objects::{CollisionList, Sphere, Vector3D};
 
 
 const DYN_R: f64 = 255.999;
@@ -17,7 +17,11 @@ const VIEWPORT_H: f64 = 2.0;
 const VIEWPORT_W: f64 = ASPECT_RATIO * VIEWPORT_H;
 const FOCAL_LEN: f64 = 1.0;
 
-fn ray_color(ray: &Ray) -> Color {
+fn ray_color(ray: &Ray, world: &dyn Solid) -> Color {
+    let mut record: HitRecord = Default::default();
+    if world.hit(ray, 0.0, f64::INFINITY, &mut record) {
+        return (Color::new(1.0, 1.0, 1.0) + record.normal).mul_by_mut(0.5)
+    }
     let direction = ray.direction.unit_vector();
     let pos = 0.5 * (direction.y + 1.0);
     Color::new(1.0, 1.0, 1.0).mul_by(1.0 - pos) + Color::new(0.5, 0.7, 1.0).mul_by(pos)
@@ -40,10 +44,15 @@ fn main() {
     let lower_left_corner =
         &origin - &(&horizontal / 2.0) - &vertical / 2.0 - Vector3D::new(0.0, 0.0, FOCAL_LEN);
 
+    // world
+    let mut world = CollisionList::new();
+    world.push(Box::new(Sphere::new(Point3D::new(0.0, 0.0, -1.0), 0.5)));
+    world.push(Box::new(Sphere::new(Point3D::new(0.0, -100.5, -1.0), 100.0)));
+
     // write header for ppm image fromat
     println!("P3\n{} {}\n255", IMG_W, IMG_H);
     for j in (0..IMG_H).rev() {
-        eprint!("\rScanlines remaining: {} ", j);
+        //eprint!("\rScanlines remaining: {} ", j);
         for i in 0..IMG_W {
             // norm values to be in range 0.0..1.0
             let u = i as f64 / (IMG_W - 1) as f64;
@@ -52,7 +61,7 @@ fn main() {
                 &origin,
                 &lower_left_corner + &horizontal.mul_by(u) + (&vertical.mul_by(v) - &origin),
             );
-            let pixel_color = ray_color(&ray);
+            let pixel_color = ray_color(&ray, &world);
             write_color(pixel_color);
         }
     }
