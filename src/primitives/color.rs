@@ -1,28 +1,38 @@
-use std::ops::{Add, Index, IndexMut, MulAssign};
 use super::traits::Vectored;
+use std::ops::{Add, AddAssign, Index, IndexMut, MulAssign};
 
-
+#[derive(Default)]
 pub struct Color {
     r: f64,
     g: f64,
-    b: f64
+    b: f64,
 }
-
 
 impl Vectored for Color {
     fn new(v0: f64, v1: f64, v2: f64) -> Self {
-        Color { r: v0, g: v1, b: v2 }   
+        Color {
+            r: v0,
+            g: v1,
+            b: v2,
+        }
     }
 }
 
-impl<T> Add<T> for Color where T: Vectored {
+impl AddAssign for Color {
+    fn add_assign(&mut self, rhs: Self) {
+        self.r += rhs.r;
+        self.g += rhs.g;
+        self.b += rhs.b;
+    }
+}
+
+impl<T> Add<T> for Color
+where
+    T: Vectored,
+{
     type Output = Color;
     fn add(self, rhs: T) -> Self::Output {
-        Color::new(
-            self.r + rhs[0],
-            self.g + rhs[1],
-            self.b + rhs[2]
-        )
+        Color::new(self.r + rhs[0], self.g + rhs[1], self.b + rhs[2])
     }
 }
 
@@ -49,7 +59,6 @@ impl IndexMut<usize> for Color {
         }
     }
 }
-
 
 impl MulAssign<f64> for Color {
     fn mul_assign(&mut self, rhs: f64) {

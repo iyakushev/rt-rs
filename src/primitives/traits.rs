@@ -1,6 +1,8 @@
-use std::ops::{Add, Index, MulAssign};
-
-use super::{objects::{Point3D, Vector3D}, ray::Ray};
+use super::{
+    objects::{Point3D, Vector3D},
+    ray::Ray,
+};
+use std::ops::{Index, MulAssign};
 
 #[derive(Default)]
 pub struct HitRecord {
@@ -10,12 +12,16 @@ pub struct HitRecord {
     pub pos: f64,
 }
 
-
 impl HitRecord {
     pub fn set_face_norm(&mut self, ray: &Ray, outward_norm: Vector3D) {
         self.front_face = ray.direction.dot(&outward_norm) < 0.0;
-        self.normal = if self.front_face {outward_norm} else {-outward_norm}  
-}}
+        self.normal = if self.front_face {
+            outward_norm
+        } else {
+            -outward_norm
+        }
+    }
+}
 
 /// This trait defines an interface for any object that can be hit by a ray
 pub trait Solid {
@@ -53,19 +59,15 @@ where
     /// Multiplies Vec3 components by a `value`
     /// and returns a new vector as a result
     fn mul_by(&self, value: f64) -> Self {
-        Self::new(
-            self[0] * value,
-            self[1] * value,
-            self[2] * value
-        )
+        Self::new(self[0] * value, self[1] * value, self[2] * value)
     }
 
     /// Returns a vector divided by it's length
     fn unit_vector(&self) -> Self {
         Self::new(
-            self[0]/self.len(),
-            self[1]/self.len(),
-            self[2]/self.len()
+            self[0] / self.len(),
+            self[1] / self.len(),
+            self[2] / self.len(),
         )
     }
 
@@ -78,4 +80,3 @@ where
         )
     }
 }
-
