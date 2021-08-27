@@ -1,8 +1,5 @@
-use super::{
-    objects::{Point3D, Vector3D},
-    ray::Ray,
-};
-use std::ops::{Index, MulAssign};
+use super::{objects::{Point3D, Vector3D}, rand_f64, rand_in_range, ray::Ray};
+use std::ops::{Index, MulAssign, Range};
 
 #[derive(Default)]
 pub struct HitRecord {
@@ -33,7 +30,29 @@ pub trait Vectored
 where
     Self: Sized + Index<usize, Output = f64> + MulAssign<f64>,
 {
+    /// Creates a new instance of the 3-dimensional Vectored object
     fn new(v0: f64, v1: f64, v2: f64) -> Self;
+
+    /// Creates a new instance of the 3-dimensional Vectored object with random coordinates
+    fn random() -> Self {
+        Self::new(rand_f64(), rand_f64(), rand_f64())
+    }
+
+    /// Creates a new instance of the 3-dimensional Vectored object with random coordinates in
+    /// specified range
+    fn random_in(range: Range<f64>) -> Self {
+        Self::new(rand_in_range(&range), rand_in_range(&range), rand_in_range(&range))
+    }
+
+    fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random_in(-1.0..1.0);
+            if p.len_squared() >= 1.0 {
+                continue
+            }
+            return p
+        }
+    }
 
     /// Returns a square root of the length
     fn len(&self) -> f64 {

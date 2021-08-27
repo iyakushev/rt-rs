@@ -1,7 +1,7 @@
 mod primitives;
 use primitives::camera::Camera;
 use primitives::color::Color;
-use primitives::objects::Point3D;
+use primitives::objects::{Point3D, Vector3D};
 use primitives::ray::Ray;
 use primitives::traits::{HitRecord, Solid, Vectored};
 
@@ -15,11 +15,16 @@ const IMG_H: i32 = (IMG_W as f64 / ASPECT_RATIO) as i32;
 
 const SAMPLES_PER_PIXEL: i32 = 100;
 const ALIASING_SCALE: f64 = 1.0/SAMPLES_PER_PIXEL as f64;
+const MAX_TRACE_DEPTH: u32 = 50;
 
-fn ray_color(ray: &Ray, world: &dyn Solid) -> Color {
+fn ray_color(ray: Ray, world: &dyn Solid, depth: u32) -> Color {
     let mut record: HitRecord = Default::default();
-    if world.hit(ray, 0.0, f64::INFINITY, &mut record) {
-        return (Color::new(1.0, 1.0, 1.0) + record.normal).mul_by_mut(0.5);
+    if depth == 0 {
+        return Color::default()
+    }
+    if world.hit(&ray, 0.0, f64::INFINITY, &mut record) {
+        let target = &record.point + &record.normal + Vector3D::random_in_unit_sphere();
+        return ray_color(Ray::new(&record.point, &target - &record.point), world, depth - 1).mul_by(0.5);
     }
     let direction = ray.direction.unit_vector();
     let pos = 0.5 * (direction.y + 1.0);
@@ -58,7 +63,7 @@ fn main() {
                 let u = (i as f64 + rand_f64()) / (IMG_W - 1) as f64;
                 let v = (j as f64 + rand_f64()) / (IMG_H - 1) as f64;
                 let ray = camera.get_ray(u, v);
-                pixel_color += ray_color(&ray, &world);
+                pixel_color += ray_color(ray, &world, MAX_TRACE_DEPTH);
             }
             write_color(&pixel_color);
         }

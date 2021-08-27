@@ -16,7 +16,7 @@ pub fn rand_f64() -> f64 {
 
 /// Generates a random number in the given range
 #[inline(always)]
-pub fn rand_in_range(range: Range<f64>) -> f64 {
+pub fn rand_in_range(range: &Range<f64>) -> f64 {
     range.start + (range.end - range.start) * rand_f64()
 }
 
