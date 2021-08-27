@@ -23,7 +23,7 @@ fn ray_color(ray: Ray, world: &dyn Solid, depth: u32) -> Color {
         return Color::default()
     }
     if world.hit(&ray, 0.001, f64::INFINITY, &mut record) {
-        let target = &record.point + &record.normal + Vector3D::random_in_unit_sphere();
+        let target = &record.point + &record.normal + Vector3D::random_unit_vector();
         return ray_color(Ray::new(&record.point, &target - &record.point), world, depth - 1).mul_by(0.5);
     }
     let direction = ray.direction.unit_vector();

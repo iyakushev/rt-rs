@@ -1,5 +1,5 @@
 use super::{objects::{Point3D, Vector3D}, rand_f64, rand_in_range, ray::Ray};
-use std::ops::{Index, MulAssign, Range};
+use std::ops::{Index, IndexMut, MulAssign, Range};
 
 #[derive(Default)]
 pub struct HitRecord {
@@ -28,7 +28,7 @@ pub trait Solid {
 /// A main vector trait that performs 3d calculations on Vectored objects
 pub trait Vectored
 where
-    Self: Sized + Index<usize, Output = f64> + MulAssign<f64>,
+    Self: Sized + Index<usize, Output = f64> + IndexMut<usize> + MulAssign<f64>,
 {
     /// Creates a new instance of the 3-dimensional Vectored object
     fn new(v0: f64, v1: f64, v2: f64) -> Self;
@@ -42,6 +42,10 @@ where
     /// specified range
     fn random_in(range: Range<f64>) -> Self {
         Self::new(rand_in_range(&range), rand_in_range(&range), rand_in_range(&range))
+    }
+
+    fn random_unit_vector() -> Self {
+        Self::random_in_unit_sphere().unit_vector_mut()
     }
 
     fn random_in_unit_sphere() -> Self {
@@ -81,13 +85,23 @@ where
         Self::new(self[0] * value, self[1] * value, self[2] * value)
     }
 
-    /// Returns a vector divided by it's length
+    /// Returns a new vector divided by it's length
     fn unit_vector(&self) -> Self {
+        let len = self.len();
         Self::new(
-            self[0] / self.len(),
-            self[1] / self.len(),
-            self[2] / self.len(),
+            self[0] / len,
+            self[1] / len,
+            self[2] / len,
         )
+    }
+
+    /// Returns a unit vector transformed the self
+    fn unit_vector_mut(mut self) -> Self {
+        let len = self.len();
+        self[0] /= len;
+        self[1] /= len;
+        self[2] /= len;
+        self
     }
 
     /// Returns a new vector which is a result of a cross-product
