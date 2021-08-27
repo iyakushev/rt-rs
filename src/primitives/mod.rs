@@ -21,6 +21,6 @@ pub fn rand_in_range(range: &Range<f64>) -> f64 {
 }
 
 #[inline(always)]
-pub fn degrees_to_radiance(degrees: f64) -> f64 {
+pub fn _degrees_to_radiance(degrees: f64) -> f64 {
     degrees * PI / 180.0
 }

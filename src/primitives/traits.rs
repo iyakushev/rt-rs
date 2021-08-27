@@ -1,29 +1,13 @@
-use super::{objects::{Point3D, Vector3D}, rand_f64, rand_in_range, ray::Ray};
+use super::{objects::HitRecord, rand_f64, rand_in_range, ray::Ray};
 use std::ops::{Index, IndexMut, MulAssign, Range};
 
-#[derive(Default)]
-pub struct HitRecord {
-    pub point: Point3D,
-    pub normal: Vector3D,
-    pub front_face: bool,
-    pub pos: f64,
-}
 
-impl HitRecord {
-    pub fn set_face_norm(&mut self, ray: &Ray, outward_norm: Vector3D) {
-        self.front_face = ray.direction.dot(&outward_norm) < 0.0;
-        self.normal = if self.front_face {
-            outward_norm
-        } else {
-            -outward_norm
-        }
-    }
-}
 
 /// This trait defines an interface for any object that can be hit by a ray
 pub trait Solid {
-    fn hit(&self, ray: &Ray, pos_min: f64, pos_max: f64, record: &mut HitRecord) -> bool;
+    fn hit(&self, ray: &Ray, pos_min: f64, pos_max: f64) -> Option<HitRecord>;
 }
+
 
 /// A main vector trait that performs 3d calculations on Vectored objects
 pub trait Vectored
@@ -44,10 +28,18 @@ where
         Self::new(rand_in_range(&range), rand_in_range(&range), rand_in_range(&range))
     }
 
+    /// Implements hemispherical scattering diffusion
+    fn random_in_hemisphere(normal: &impl Vectored) -> Self {
+        let in_sphere = Self::random_in_unit_sphere();
+        let mask: i32 = in_sphere.dot(normal) as i32 >> 31;
+        in_sphere.mul_by_mut((-1.0f64).powi(mask))
+    }
+
     fn random_unit_vector() -> Self {
         Self::random_in_unit_sphere().unit_vector_mut()
     }
 
+    /// used for Lambertian reflections
     fn random_in_unit_sphere() -> Self {
         loop {
             let p = Self::random_in(-1.0..1.0);
@@ -69,7 +61,7 @@ where
     }
 
     /// Returns a dot product of two vectors
-    fn dot(&self, other: &Self) -> f64 {
+    fn dot(&self, other: &impl Vectored) -> f64 {
         self[0] * other[0] + self[1] * other[1] + self[2] * other[2]
     }
 

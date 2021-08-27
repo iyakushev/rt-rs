@@ -1,4 +1,5 @@
-use crate::primitives::traits::{HitRecord, Solid};
+use crate::primitives::traits::Solid;
+use super::HitRecord;
 
 
 pub struct CollisionList {
@@ -14,27 +15,23 @@ impl CollisionList {
         self.objects.push(obj);
     }
 
-    pub fn clear(&mut self) {
+    pub fn _clear(&mut self) {
         self.objects.clear();
     }
 }
 
 
 impl Solid for CollisionList {
-    fn hit(&self, ray: &crate::primitives::ray::Ray, pos_min: f64, pos_max: f64, record: &mut crate::primitives::traits::HitRecord) -> bool {
-        let mut hit_anything = false;
-        let mut tmp_record: HitRecord = Default::default();
+    fn hit(&self, ray: &crate::primitives::ray::Ray, pos_min: f64, pos_max: f64) -> Option<HitRecord> {
         let mut closest_so_far = pos_max;
+        let mut last_record = None;
 
         for obj in &self.objects {
-            if obj.hit(ray, pos_min, closest_so_far, &mut tmp_record) {
-                hit_anything = true;
+            if let Some(tmp_record) = obj.hit(ray, pos_min, closest_so_far) {
                 closest_so_far = tmp_record.pos;
+                last_record = Some(tmp_record);
             }
-        } 
-        if hit_anything {
-            *record = tmp_record;
         }
-        hit_anything
+        last_record
     }
 }

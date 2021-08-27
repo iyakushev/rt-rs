@@ -3,7 +3,7 @@ use primitives::camera::Camera;
 use primitives::color::Color;
 use primitives::objects::{Point3D, Vector3D};
 use primitives::ray::Ray;
-use primitives::traits::{HitRecord, Solid, Vectored};
+use primitives::traits::{Solid, Vectored};
 
 use crate::primitives::objects::{CollisionList, Sphere};
 use crate::primitives::rand_f64;
@@ -18,12 +18,14 @@ const ALIASING_SCALE: f64 = 1.0/SAMPLES_PER_PIXEL as f64;
 const MAX_TRACE_DEPTH: u32 = 50;
 
 fn ray_color(ray: Ray, world: &dyn Solid, depth: u32) -> Color {
-    let mut record: HitRecord = Default::default();
     if depth == 0 {
         return Color::default()
     }
-    if world.hit(&ray, 0.001, f64::INFINITY, &mut record) {
-        let target = &record.point + &record.normal + Vector3D::random_unit_vector();
+    if let Some(record) = world.hit(&ray, 0.001, f64::INFINITY) {
+        // Lambertian
+        //let target = &record.point + &record.normal + Vector3D::random_unit_vector();
+        // Hemispherical
+        let target = &record.point + &Vector3D::random_in_hemisphere(&record.normal);
         return ray_color(Ray::new(&record.point, &target - &record.point), world, depth - 1).mul_by(0.5);
     }
     let direction = ray.direction.unit_vector();
@@ -32,7 +34,7 @@ fn ray_color(ray: Ray, world: &dyn Solid, depth: u32) -> Color {
 }
 
 fn write_color(color: &Color) {
-    let color = color.mul_by(ALIASING_SCALE).gamma_correction(2.0);
+    let color = color.mul_by(ALIASING_SCALE).gamma_correction(0.5);
     println!(
         "{} {} {}",
         (256.0 * color[0].clamp(0.0, 0.999)) as i32,

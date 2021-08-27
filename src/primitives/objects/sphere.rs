@@ -1,5 +1,5 @@
-use super::Point3D;
-use crate::primitives::traits::{HitRecord, Solid, Vectored};
+use super::{HitRecord, Point3D, Vector3D};
+use crate::primitives::traits::{Solid, Vectored};
 
 pub struct Sphere {
     center: Point3D,
@@ -18,15 +18,14 @@ impl Solid for Sphere {
         ray: &crate::primitives::ray::Ray,
         pos_min: f64,
         pos_max: f64,
-        record: &mut HitRecord,
-    ) -> bool {
+    ) -> Option<HitRecord> {
         let origin = ray.origin - &self.center;
         let a = ray.direction.len_squared();
         let b_halfed = origin.dot(&ray.direction);
         let c = origin.len_squared() - self.radius * self.radius;
-        let discriminant = b_halfed * b_halfed - a * c;
+        let discriminant = b_halfed.powi(2)  - a * c;
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
         let sqrt_d = discriminant.sqrt();
 
@@ -35,14 +34,16 @@ impl Solid for Sphere {
         if root < pos_min || pos_max < root {
             root = (-b_halfed + sqrt_d) / a;
             if root < pos_min || pos_max < root {
-                return false;
+                return None;
             }
         }
-
-        record.pos = root;
-        record.point = ray.at(root);
+        let mut record = HitRecord {
+            pos: root,
+            point: ray.at(root),
+            normal: Vector3D::default()
+        };
         let outward_norm = (&record.point - &self.center) / self.radius;
         record.set_face_norm(ray, outward_norm);
-        true
+        Some(record)
     }
 }

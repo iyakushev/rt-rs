@@ -1,5 +1,5 @@
 use super::traits::Vectored;
-use std::ops::{Add, AddAssign, Index, IndexMut, MulAssign};
+use std::ops::{Add, AddAssign, Index, IndexMut, MulAssign, Neg};
 
 #[derive(Default)]
 pub struct Color {
@@ -9,7 +9,16 @@ pub struct Color {
 }
 
 impl Color {
+    /// Applies gamma correction. 
     pub fn gamma_correction(mut self, gamma: f64) -> Self {
+        self.r = self.r.powf(gamma);
+        self.g = self.g.powf(gamma);
+        self.b = self.b.powf(gamma);
+        self
+    }
+
+    /// Same as gamma_correction but gamma is equal to 1/2
+    pub fn gamma_correction_halfed(mut self) -> Self {
         self.r = self.r.sqrt();
         self.g = self.g.sqrt();
         self.b = self.b.sqrt();
@@ -23,6 +32,17 @@ impl Vectored for Color {
             r: v0,
             g: v1,
             b: v2,
+        }
+    }
+}
+
+impl Neg for Color {
+    type Output = Color;
+    fn neg(self) -> Self::Output {
+        Color {
+            r: -self.r,
+            g: -self.g,
+            b: -self.b
         }
     }
 }
