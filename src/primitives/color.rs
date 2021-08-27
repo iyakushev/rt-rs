@@ -8,6 +8,15 @@ pub struct Color {
     b: f64,
 }
 
+impl Color {
+    pub fn gamma_correction(mut self, gamma: f64) -> Self {
+        self.r = self.r.sqrt();
+        self.g = self.g.sqrt();
+        self.b = self.b.sqrt();
+        self
+    }
+}
+
 impl Vectored for Color {
     fn new(v0: f64, v1: f64, v2: f64) -> Self {
         Color {
