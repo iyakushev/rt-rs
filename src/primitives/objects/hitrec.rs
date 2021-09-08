@@ -1,4 +1,4 @@
-use crate::primitives::{ray::Ray, traits::Vectored};
+use crate::primitives::{material::Material, ray::Ray, traits::Vectored};
 
 use super::{Point3D, Vector3D};
 

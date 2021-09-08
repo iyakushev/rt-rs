@@ -3,6 +3,7 @@ pub mod color;
 pub mod objects;
 pub mod ray;
 pub mod traits;
+pub mod material;
 
 use rand::prelude::*;
 use std::{f64::consts::PI, ops::Range};

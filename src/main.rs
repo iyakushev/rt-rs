@@ -34,7 +34,7 @@ fn ray_color(ray: Ray, world: &dyn Solid, depth: u32) -> Color {
 }
 
 fn write_color(color: &Color) {
-    let color = color.mul_by(ALIASING_SCALE).gamma_correction(0.5);
+    let color = color.mul_by(ALIASING_SCALE).gamma_correction_halfed();
     println!(
         "{} {} {}",
         (256.0 * color[0].clamp(0.0, 0.999)) as i32,
